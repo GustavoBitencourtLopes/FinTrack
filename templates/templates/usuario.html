@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>FinTrack</title>
+</head>
+<body>
+    <h1>Olá, {{ usuario.nome }}!</h1>
+    <p>Renda mensal: R$ {{ usuario.renda_mensal }}</p>
+    <p>Total gasto: R$ {{ usuario.total_gastos() }}</p>
+    <p>Situação: {{ usuario.situacao_financeira() }}</p>
+
+    <h2>Transações</h2>
+    <ul>
+    {% for t in usuario.transacoes %}
+        <li>{{ t.descricao }} — R$ {{ t.valor }} ({{ t.categoria }})</li>
+    {% endfor %}
+    </ul>
+</body>
+</html>
