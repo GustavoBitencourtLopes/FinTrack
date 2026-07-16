@@ -83,3 +83,22 @@ def dashboard():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+@app.route("/adicionar_transacao", methods=["POST"])
+@login_required
+def adicionar_transacao():
+    descricao = request.form["descricao"]
+    valor = float(request.form["valor"])
+    categoria = request.form.get("categoria") or "Outros"
+
+    nova_transacao = Transacao(
+        descricao=descricao,
+        valor=valor,
+        categoria=categoria,
+        usuario_id=current_user.id
+    )
+    db_session.add(nova_transacao)
+    db_session.commit()
+
+    return redirect(url_for("dashboard"))

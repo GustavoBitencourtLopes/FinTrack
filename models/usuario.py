@@ -47,6 +47,50 @@ class Usuario(Base, UserMixin):
 
     def __repr__(self):
         return f"Usuario(nome={self.nome!r}, renda={self.renda_mensal})"
+    
+    def sobra_mensal(self):
+        """Quanto sobra da renda depois de descontar todos os gastos."""
+        return self.renda_mensal - self.total_gastos()
+
+    def recomendacao_investimento(self):
+        """
+        Regras simplificadas, só para fins didáticos (não é assessoria
+        financeira real). A lógica combina a situação financeira com o
+        valor de sobra mensal para dar uma sugestão de próximo passo.
+        """
+        situacao = self.situacao_financeira()
+        sobra = self.sobra_mensal()
+
+        if situacao == "Alerta":
+            return (
+                "Seus gastos estão consumindo quase toda (ou mais que) sua renda. "
+                "Antes de pensar em investir, o foco deveria ser reduzir despesas "
+                "e evitar dívidas."
+            )
+
+        if situacao == "Atenção":
+            return (
+                f"Você tem uma sobra de R${sobra:.2f} este mês. O ideal é priorizar "
+                "uma reserva de emergência, em algo simples e de fácil acesso, como "
+                "Tesouro Selic ou CDB com liquidez diária."
+            )
+
+        # Situação "OK"
+        if sobra <= 0:
+            return "Sua renda está totalmente comprometida. Reveja seus gastos antes de investir."
+        elif sobra < 500:
+            return (
+                f"Você tem R${sobra:.2f} de sobra. Um bom começo é formar uma reserva "
+                "de emergência em Tesouro Selic ou CDB de liquidez diária."
+            )
+        else:
+            return (
+                f"Você tem R${sobra:.2f} de sobra mensal, uma boa margem! Considere "
+                "manter uma reserva de emergência e destinar o restante a investimentos "
+                "de médio/longo prazo, de acordo com seu perfil de risco (renda fixa "
+                "para perfil conservador, ou uma parcela em renda variável para perfis "
+                "mais arrojados)."
+            )
 
 
 class Transacao(Base):
