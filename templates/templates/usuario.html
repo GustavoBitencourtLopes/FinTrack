@@ -1,40 +1,91 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>FinTrack</title>
-</head>
-<body>
-    <h1>Olá, {{ usuario.nome }}!</h1>
-    <p>Renda mensal: R$ {{ usuario.renda_mensal }}</p>
-    <p>Total gasto: R$ {{ usuario.total_gastos() }}</p>
-    <p>Sobra mensal: R$ {{ "%.2f"|format(usuario.sobra_mensal()) }}</p>
-    <p>Situação: {{ usuario.situacao_financeira() }}</p>
+{% extends "base.html" %}
+{% block title %}Dashboard — FinTrack{% endblock %}
+{% block content %}
 
-    <h2>Recomendação</h2>
-    <p>{{ usuario.recomendacao_investimento() }}</p>
+{% set pct = [usuario.percentual_gasto(), 100] | min %}
+{% set situacao = usuario.situacao_financeira() %}
+{% if situacao == "OK" %}
+    {% set status_class = "status-ok" %}
+    {% set gauge_color = "var(--accent)" %}
+{% elif situacao == "Atenção" %}
+    {% set status_class = "status-atencao" %}
+    {% set gauge_color = "var(--warning)" %}
+{% else %}
+    {% set status_class = "status-alerta" %}
+    {% set gauge_color = "var(--danger)" %}
+{% endif %}
 
-    <h2>Transações</h2>
-    <ul>
-    {% for t in usuario.transacoes %}
-        <li>{{ t.descricao }} — R$ {{ t.valor }} ({{ t.categoria }})</li>
-    {% endfor %}
+<div class="dash-header">
+    <div>
+        <h1>Olá, {{ usuario.nome }}</h1>
+        <div class="greeting">Aqui está seu resumo do mês</div>
+    </div>
+</div>
+
+<div class="grid">
+    <div class="card">
+        <div class="stat-label">Renda mensal</div>
+        <div class="stat-value">R$ {{ "%.2f"|format(usuario.renda_mensal) }}</div>
+    </div>
+    <div class="card">
+        <div class="stat-label">Total gasto</div>
+        <div class="stat-value">R$ {{ "%.2f"|format(usuario.total_gastos()) }}</div>
+    </div>
+    <div class="card">
+        <div class="stat-label">Sobra mensal</div>
+        <div class="stat-value">R$ {{ "%.2f"|format(usuario.sobra_mensal()) }}</div>
+    </div>
+
+    <div class="card gauge-card">
+        <div class="gauge" style="--pct-target: {{ pct }}; --gauge-color: {{ gauge_color }};">
+            <div class="gauge-inner">
+                <div class="pct">{{ pct | round | int }}%</div>
+                <div class="label">gasto</div>
+            </div>
+        </div>
+        <div>
+            <span class="status-badge {{ status_class }}">{{ situacao }}</span>
+            <p class="recommendation">{{ usuario.recomendacao_investimento() }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="section-title">Transações</div>
+<div class="card">
+    {% if usuario.transacoes %}
+    <ul class="tx-list">
+        {% for t in usuario.transacoes %}
+        <li class="tx-item">
+            <div>
+                <div class="tx-desc">{{ t.descricao }}</div>
+                <div class="tx-cat">{{ t.categoria }}</div>
+            </div>
+            <div class="tx-value">− R$ {{ "%.2f"|format(t.valor) }}</div>
+        </li>
+        {% endfor %}
     </ul>
+    {% else %}
+    <div class="empty-state">Nenhum gasto registrado ainda. Adicione o primeiro abaixo.</div>
+    {% endif %}
+</div>
 
-    <h2>Adicionar novo gasto</h2>
+<div class="section-title">Adicionar gasto</div>
+<div class="card form-card">
     <form method="POST" action="/adicionar_transacao">
-        <label>Descrição:</label>
-        <input type="text" name="descricao" required><br><br>
-
-        <label>Valor:</label>
-        <input type="number" step="0.01" name="valor" required><br><br>
-
-        <label>Categoria:</label>
-        <input type="text" name="categoria" placeholder="Ex: Alimentação, Lazer, Moradia"><br><br>
-
-        <button type="submit">Adicionar</button>
+        <div class="field">
+            <label for="descricao">Descrição</label>
+            <input type="text" id="descricao" name="descricao" required>
+        </div>
+        <div class="field">
+            <label for="valor">Valor (R$)</label>
+            <input type="number" step="0.01" id="valor" name="valor" required>
+        </div>
+        <div class="field">
+            <label for="categoria">Categoria</label>
+            <input type="text" id="categoria" name="categoria" placeholder="Ex: Alimentação, Lazer, Moradia">
+        </div>
+        <button type="submit" class="btn btn-primary">Adicionar gasto</button>
     </form>
+</div>
 
-    <p><a href="/logout">Sair</a></p>
-</body>
-</html>
+{% endblock %}

@@ -3,6 +3,8 @@ from sqlalchemy.orm import declarative_base, relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
+# Base é a "fundação" que o SQLAlchemy usa pra saber quais classes
+# devem virar tabelas no banco.
 Base = declarative_base()
 
 
@@ -10,13 +12,14 @@ Base = declarative_base()
 # prontos que o Flask-Login precisa pra saber "quem está logado"
 # (como is_authenticated, get_id, etc). A gente só herda e ganha de graça.
 class Usuario(Base, UserMixin):
-    __tablename__ = "usuarios"
+    __tablename__ = "usuarios"  # nome da tabela no banco
 
+    # Cada Column vira uma coluna da tabela.
     id = Column(Integer, primary_key=True)
     nome = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False)
     senha_hash = Column(String, nullable=False)
-    renda_mensal = Column(Float, default=0)
+    renda_mensal = Column(Float, nullable=True, default=None)
 
     def set_senha(self, senha_texto_puro):
         """Recebe a senha digitada e guarda só a versão embaralhada (hash)."""
@@ -26,13 +29,17 @@ class Usuario(Base, UserMixin):
         """Compara a senha digitada no login com o hash salvo no banco."""
         return check_password_hash(self.senha_hash, senha_texto_puro)
 
+    # 'relationship' não é uma coluna real no banco. É um "atalho" que o
+    # SQLAlchemy cria pra você acessar, em Python, todas as Transacoes
+    # ligadas a esse usuário, sem precisar escrever um SELECT manualmente.
     transacoes = relationship("Transacao", back_populates="usuario")
 
+    # As mesmas regras de negócio de antes continuam aqui, sem mudar nada.
     def total_gastos(self):
         return sum(t.valor for t in self.transacoes)
 
     def percentual_gasto(self):
-        if self.renda_mensal == 0:
+        if not self.renda_mensal:
             return 0
         return (self.total_gastos() / self.renda_mensal) * 100
 
@@ -45,12 +52,13 @@ class Usuario(Base, UserMixin):
         else:
             return "Alerta"
 
-    def __repr__(self):
-        return f"Usuario(nome={self.nome!r}, renda={self.renda_mensal})"
-    
     def sobra_mensal(self):
         """Quanto sobra da renda depois de descontar todos os gastos."""
-        return self.renda_mensal - self.total_gastos()
+        return (self.renda_mensal or 0) - self.total_gastos()
+
+    def precisa_definir_renda(self):
+        """True se o usuário ainda não preencheu a renda mensal (onboarding)."""
+        return self.renda_mensal is None
 
     def recomendacao_investimento(self):
         """
@@ -92,6 +100,9 @@ class Usuario(Base, UserMixin):
                 "mais arrojados)."
             )
 
+    def __repr__(self):
+        return f"Usuario(nome={self.nome!r}, renda={self.renda_mensal})"
+
 
 class Transacao(Base):
     __tablename__ = "transacoes"
@@ -100,6 +111,8 @@ class Transacao(Base):
     descricao = Column(String, nullable=False)
     valor = Column(Float, nullable=False)
     categoria = Column(String, default="Outros")
+
+    # Isso é a chave estrangeira: guarda o id do usuário dono dessa transação.
     usuario_id = Column(Integer, ForeignKey("usuarios.id"))
     usuario = relationship("Usuario", back_populates="transacoes")
 

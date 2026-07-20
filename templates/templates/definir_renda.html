@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Só mais um passo — FinTrack{% endblock %}
+{% block content %}
+<div class="auth-card">
+    <div class="eyebrow">Passo 2 de 2</div>
+    <h1>Qual é a sua renda mensal?</h1>
+    <p class="subtitle">Usamos isso para calcular sua situação financeira e recomendações. Você pode alterar depois.</p>
+
+    <form method="POST">
+        <div class="field">
+            <label for="renda_mensal">Renda mensal (R$)</label>
+            <input type="number" step="0.01" id="renda_mensal" name="renda_mensal" autofocus required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Continuar</button>
+    </form>
+</div>
+{% endblock %}

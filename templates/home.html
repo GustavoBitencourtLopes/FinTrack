@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}FinTrack — Saiba para onde vai o seu dinheiro{% endblock %}
+{% block content %}
+<section class="hero">
+    <div class="eyebrow">Controle financeiro pessoal</div>
+    <h1>Saiba exatamente para onde vai o seu dinheiro.</h1>
+    <p>O FinTrack cruza sua renda com seus gastos, mostra sua real situação financeira e recomenda o próximo passo — sem planilha, sem complicação.</p>
+    <div class="cta-row">
+        <a href="/cadastro" class="btn btn-primary">Criar minha conta</a>
+        <a href="/login" class="btn btn-ghost">Já tenho conta</a>
+    </div>
+
+    <div class="features">
+        <div class="feature-card">
+            <div class="icon">01 · registro</div>
+            <h3>Lance seus gastos</h3>
+            <p>Cadastre cada despesa com descrição e categoria, em segundos.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">02 · diagnóstico</div>
+            <h3>Veja sua situação real</h3>
+            <p>Um indicador visual mostra se você está no OK, em Atenção ou em Alerta.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">03 · direção</div>
+            <h3>Receba uma recomendação</h3>
+            <p>Com base na sua sobra mensal, o FinTrack sugere o próximo passo financeiro.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}
