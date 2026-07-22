@@ -1,0 +1,4 @@
+venv/
+fintrack.db
+__pycache__/
+*.pyc
