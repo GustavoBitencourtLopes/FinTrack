@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Meus Cenários — FinTrack{% endblock %}
+{% block content %}
+
+<div class="dash-header">
+    <div>
+        <h1>Meus cenários</h1>
+        <div class="greeting">Cada cenário é uma simulação separada, com sua própria renda e gastos.</div>
+    </div>
+    <a href="/cenarios/novo" class="btn btn-primary">+ Novo cenário</a>
+</div>
+
+{% if cenarios %}
+<div class="grid">
+    {% for c in cenarios %}
+    {% set situacao = c.situacao_financeira() %}
+    {% if situacao == "OK" %}{% set status_class = "status-ok" %}
+    {% elif situacao == "Atenção" %}{% set status_class = "status-atencao" %}
+    {% else %}{% set status_class = "status-alerta" %}{% endif %}
+
+    <a href="{{ url_for('ver_cenario', cenario_id=c.id) }}" class="card" style="text-decoration:none; display:block;">
+        <span class="status-badge {{ status_class }}">{{ situacao }}</span>
+        <h3 style="margin-top: 4px;">{{ c.nome }}</h3>
+        <div class="stat-label">Renda mensal</div>
+        <div class="stat-value">R$ {{ "%.2f"|format(c.renda_mensal) }}</div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">Você ainda não tem nenhum cenário. Crie o primeiro para começar a simular sua vida financeira.</div>
+</div>
+{% endif %}
+
+{% endblock %}

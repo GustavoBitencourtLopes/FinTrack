@@ -3,38 +3,48 @@ from sqlalchemy.orm import declarative_base, relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
-# Base é a "fundação" que o SQLAlchemy usa pra saber quais classes
-# devem virar tabelas no banco.
 Base = declarative_base()
 
 
-# UserMixin é uma classe do Flask-Login que já vem com alguns métodos
-# prontos que o Flask-Login precisa pra saber "quem está logado"
-# (como is_authenticated, get_id, etc). A gente só herda e ganha de graça.
 class Usuario(Base, UserMixin):
-    __tablename__ = "usuarios"  # nome da tabela no banco
+    __tablename__ = "usuarios"
 
-    # Cada Column vira uma coluna da tabela.
     id = Column(Integer, primary_key=True)
     nome = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False)
     senha_hash = Column(String, nullable=False)
-    renda_mensal = Column(Float, nullable=True, default=None)
+
+    # Um usuário agora tem vários cenários (simulações), não uma renda fixa.
+    cenarios = relationship("Cenario", back_populates="usuario", order_by="Cenario.id")
 
     def set_senha(self, senha_texto_puro):
-        """Recebe a senha digitada e guarda só a versão embaralhada (hash)."""
         self.senha_hash = generate_password_hash(senha_texto_puro)
 
     def checar_senha(self, senha_texto_puro):
-        """Compara a senha digitada no login com o hash salvo no banco."""
         return check_password_hash(self.senha_hash, senha_texto_puro)
 
-    # 'relationship' não é uma coluna real no banco. É um "atalho" que o
-    # SQLAlchemy cria pra você acessar, em Python, todas as Transacoes
-    # ligadas a esse usuário, sem precisar escrever um SELECT manualmente.
-    transacoes = relationship("Transacao", back_populates="usuario")
+    def __repr__(self):
+        return f"Usuario(nome={self.nome!r})"
 
-    # As mesmas regras de negócio de antes continuam aqui, sem mudar nada.
+
+class Cenario(Base):
+    """
+    Um Cenário representa uma simulação financeira: uma renda mensal
+    específica, junto com os gastos associados a ela. Um mesmo usuário
+    pode ter vários cenários (ex: "Cenário 1" com renda de R$3000,
+    "Cenário 2" com renda de R$5000), cada um com seus próprios gastos.
+    """
+    __tablename__ = "cenarios"
+
+    id = Column(Integer, primary_key=True)
+    nome = Column(String, nullable=False, default="Cenário")
+    renda_mensal = Column(Float, nullable=False, default=0)
+
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    usuario = relationship("Usuario", back_populates="cenarios")
+
+    transacoes = relationship("Transacao", back_populates="cenario")
+
     def total_gastos(self):
         return sum(t.valor for t in self.transacoes)
 
@@ -53,18 +63,12 @@ class Usuario(Base, UserMixin):
             return "Alerta"
 
     def sobra_mensal(self):
-        """Quanto sobra da renda depois de descontar todos os gastos."""
         return (self.renda_mensal or 0) - self.total_gastos()
-
-    def precisa_definir_renda(self):
-        """True se o usuário ainda não preencheu a renda mensal (onboarding)."""
-        return self.renda_mensal is None
 
     def recomendacao_investimento(self):
         """
         Regras simplificadas, só para fins didáticos (não é assessoria
-        financeira real). A lógica combina a situação financeira com o
-        valor de sobra mensal para dar uma sugestão de próximo passo.
+        financeira real).
         """
         situacao = self.situacao_financeira()
         sobra = self.sobra_mensal()
@@ -83,7 +87,6 @@ class Usuario(Base, UserMixin):
                 "Tesouro Selic ou CDB com liquidez diária."
             )
 
-        # Situação "OK"
         if sobra <= 0:
             return "Sua renda está totalmente comprometida. Reveja seus gastos antes de investir."
         elif sobra < 500:
@@ -95,13 +98,11 @@ class Usuario(Base, UserMixin):
             return (
                 f"Você tem R${sobra:.2f} de sobra mensal, uma boa margem! Considere "
                 "manter uma reserva de emergência e destinar o restante a investimentos "
-                "de médio/longo prazo, de acordo com seu perfil de risco (renda fixa "
-                "para perfil conservador, ou uma parcela em renda variável para perfis "
-                "mais arrojados)."
+                "de médio/longo prazo, de acordo com seu perfil de risco."
             )
 
     def __repr__(self):
-        return f"Usuario(nome={self.nome!r}, renda={self.renda_mensal})"
+        return f"Cenario(nome={self.nome!r}, renda={self.renda_mensal})"
 
 
 class Transacao(Base):
@@ -112,9 +113,9 @@ class Transacao(Base):
     valor = Column(Float, nullable=False)
     categoria = Column(String, default="Outros")
 
-    # Isso é a chave estrangeira: guarda o id do usuário dono dessa transação.
-    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
-    usuario = relationship("Usuario", back_populates="transacoes")
+    # Agora a transação pertence a um Cenário, não direto ao Usuário.
+    cenario_id = Column(Integer, ForeignKey("cenarios.id"), nullable=False)
+    cenario = relationship("Cenario", back_populates="transacoes")
 
     def __repr__(self):
         return f"Transacao({self.descricao!r}, R${self.valor}, {self.categoria!r})"

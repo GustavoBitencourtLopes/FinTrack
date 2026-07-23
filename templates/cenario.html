@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Dashboard — FinTrack{% endblock %}
+{% block title %}{{ cenario.nome }} — FinTrack{% endblock %}
 {% block content %}
 
-{% set pct = [usuario.percentual_gasto(), 100] | min %}
-{% set situacao = usuario.situacao_financeira() %}
+{% set pct = [cenario.percentual_gasto(), 100] | min %}
+{% set situacao = cenario.situacao_financeira() %}
 {% if situacao == "OK" %}
     {% set status_class = "status-ok" %}
     {% set gauge_color = "var(--accent)" %}
@@ -17,23 +17,23 @@
 
 <div class="dash-header">
     <div>
-        <h1>Olá, {{ usuario.nome }}</h1>
-        <div class="greeting">Aqui está seu resumo do mês</div>
+        <div class="greeting"><a href="/cenarios">← Meus cenários</a></div>
+        <h1>{{ cenario.nome }}</h1>
     </div>
 </div>
 
 <div class="grid">
     <div class="card">
         <div class="stat-label">Renda mensal</div>
-        <div class="stat-value">R$ {{ "%.2f"|format(usuario.renda_mensal) }}</div>
+        <div class="stat-value">R$ {{ "%.2f"|format(cenario.renda_mensal) }}</div>
     </div>
     <div class="card">
         <div class="stat-label">Total gasto</div>
-        <div class="stat-value">R$ {{ "%.2f"|format(usuario.total_gastos()) }}</div>
+        <div class="stat-value">R$ {{ "%.2f"|format(cenario.total_gastos()) }}</div>
     </div>
     <div class="card">
         <div class="stat-label">Sobra mensal</div>
-        <div class="stat-value">R$ {{ "%.2f"|format(usuario.sobra_mensal()) }}</div>
+        <div class="stat-value">R$ {{ "%.2f"|format(cenario.sobra_mensal()) }}</div>
     </div>
 
     <div class="card gauge-card">
@@ -45,16 +45,16 @@
         </div>
         <div>
             <span class="status-badge {{ status_class }}">{{ situacao }}</span>
-            <p class="recommendation">{{ usuario.recomendacao_investimento() }}</p>
+            <p class="recommendation">{{ cenario.recomendacao_investimento() }}</p>
         </div>
     </div>
 </div>
 
 <div class="section-title">Transações</div>
 <div class="card">
-    {% if usuario.transacoes %}
+    {% if cenario.transacoes %}
     <ul class="tx-list">
-        {% for t in usuario.transacoes %}
+        {% for t in cenario.transacoes %}
         <li class="tx-item">
             <div>
                 <div class="tx-desc">{{ t.descricao }}</div>
@@ -65,13 +65,13 @@
         {% endfor %}
     </ul>
     {% else %}
-    <div class="empty-state">Nenhum gasto registrado ainda. Adicione o primeiro abaixo.</div>
+    <div class="empty-state">Nenhum gasto registrado ainda neste cenário.</div>
     {% endif %}
 </div>
 
 <div class="section-title">Adicionar gasto</div>
 <div class="card form-card">
-    <form method="POST" action="/adicionar_transacao">
+    <form method="POST" action="{{ url_for('adicionar_transacao', cenario_id=cenario.id) }}">
         <div class="field">
             <label for="descricao">Descrição</label>
             <input type="text" id="descricao" name="descricao" required>

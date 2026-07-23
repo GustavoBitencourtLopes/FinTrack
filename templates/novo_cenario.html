@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Novo Cenário — FinTrack{% endblock %}
+{% block content %}
+<div class="auth-card">
+    <h1>Criar novo cenário</h1>
+    <p class="subtitle">Dê um nome e informe a renda mensal para esta simulação.</p>
+
+    <form method="POST">
+        <div class="field">
+            <label for="nome">Nome do cenário</label>
+            <input type="text" id="nome" name="nome" placeholder="{{ sugestao_nome }}">
+        </div>
+        <div class="field">
+            <label for="renda_mensal">Renda mensal (R$)</label>
+            <input type="number" step="0.01" id="renda_mensal" name="renda_mensal" autofocus required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Criar cenário</button>
+    </form>
+
+    <p class="switch-link"><a href="/cenarios">Voltar para meus cenários</a></p>
+</div>
+{% endblock %}

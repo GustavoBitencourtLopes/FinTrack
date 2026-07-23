@@ -1,13 +1,11 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, abort
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from database import db_session
-from models.usuario import Usuario, Transacao
+from models.usuario import Usuario, Cenario, Transacao
 
 app = Flask(__name__)
-# Em produção, a chave vem de uma variável de ambiente (mais seguro).
-# Em desenvolvimento local, usa uma chave padrão só para não quebrar.
-app.secret_key = os.environ.get("SECRET_KEY", "chave-de-desenvolvimento-trocar-depois")  # necessário para sessões e flash messages
+app.secret_key = os.environ.get("SECRET_KEY", "chave-de-desenvolvimento-trocar-depois")
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -16,13 +14,24 @@ login_manager.login_view = "login"
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
-    """Fecha a sessão do banco automaticamente ao final de cada requisição."""
     db_session.remove()
 
 
 @login_manager.user_loader
 def load_user(user_id):
     return db_session.query(Usuario).get(int(user_id))
+
+
+def get_cenario_do_usuario_ou_404(cenario_id):
+    """
+    Busca um cenário pelo id, mas só devolve se ele pertencer ao usuário
+    logado. Isso evita que uma pessoa acesse /cenarios/5 e veja os dados
+    financeiros de outra pessoa só trocando o número na URL.
+    """
+    cenario = db_session.query(Cenario).get(cenario_id)
+    if cenario is None or cenario.usuario_id != current_user.id:
+        abort(404)
+    return cenario
 
 
 @app.route("/")
@@ -42,7 +51,7 @@ def cadastro():
             flash("Já existe um usuário com esse email.")
             return redirect(url_for("cadastro"))
 
-        novo_usuario = Usuario(nome=nome, email=email, renda_mensal=None)
+        novo_usuario = Usuario(nome=nome, email=email)
         novo_usuario.set_senha(senha)
         db_session.add(novo_usuario)
         db_session.commit()
@@ -63,9 +72,7 @@ def login():
 
         if usuario and usuario.checar_senha(senha):
             login_user(usuario)
-            if usuario.precisa_definir_renda():
-                return redirect(url_for("definir_renda"))
-            return redirect(url_for("dashboard"))
+            return redirect(url_for("cenarios"))
         else:
             flash("Email ou senha incorretos.")
             return redirect(url_for("login"))
@@ -80,29 +87,42 @@ def logout():
     return redirect(url_for("home"))
 
 
-@app.route("/definir_renda", methods=["GET", "POST"])
+@app.route("/cenarios")
 @login_required
-def definir_renda():
+def cenarios():
+    """Lista todos os cenários do usuário logado, com opção de criar um novo."""
+    return render_template("cenarios.html", cenarios=current_user.cenarios)
+
+
+@app.route("/cenarios/novo", methods=["GET", "POST"])
+@login_required
+def novo_cenario():
     if request.method == "POST":
+        nome = request.form.get("nome") or f"Cenário {len(current_user.cenarios) + 1}"
         renda = float(request.form["renda_mensal"])
-        current_user.renda_mensal = renda
+
+        novo = Cenario(nome=nome, renda_mensal=renda, usuario_id=current_user.id)
+        db_session.add(novo)
         db_session.commit()
-        return redirect(url_for("dashboard"))
 
-    return render_template("definir_renda.html")
+        return redirect(url_for("ver_cenario", cenario_id=novo.id))
+
+    sugestao_nome = f"Cenário {len(current_user.cenarios) + 1}"
+    return render_template("novo_cenario.html", sugestao_nome=sugestao_nome)
 
 
-@app.route("/dashboard")
+@app.route("/cenarios/<int:cenario_id>")
 @login_required
-def dashboard():
-    if current_user.precisa_definir_renda():
-        return redirect(url_for("definir_renda"))
-    return render_template("usuario.html", usuario=current_user)
+def ver_cenario(cenario_id):
+    cenario = get_cenario_do_usuario_ou_404(cenario_id)
+    return render_template("cenario.html", cenario=cenario, usuario=current_user)
 
 
-@app.route("/adicionar_transacao", methods=["POST"])
+@app.route("/cenarios/<int:cenario_id>/adicionar_transacao", methods=["POST"])
 @login_required
-def adicionar_transacao():
+def adicionar_transacao(cenario_id):
+    cenario = get_cenario_do_usuario_ou_404(cenario_id)
+
     descricao = request.form["descricao"]
     valor = float(request.form["valor"])
     categoria = request.form.get("categoria") or "Outros"
@@ -111,12 +131,12 @@ def adicionar_transacao():
         descricao=descricao,
         valor=valor,
         categoria=categoria,
-        usuario_id=current_user.id
+        cenario_id=cenario.id
     )
     db_session.add(nova_transacao)
     db_session.commit()
 
-    return redirect(url_for("dashboard"))
+    return redirect(url_for("ver_cenario", cenario_id=cenario.id))
 
 
 if __name__ == "__main__":
