@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Painel — FinTrack{% endblock %}
+{% block content %}
+
+<div class="dash-header">
+    <div>
+        <h1>Olá, {{ current_user.nome }}</h1>
+        <div class="greeting">O que você quer fazer?</div>
+    </div>
+</div>
+
+<div class="features">
+    <a href="{{ url_for('cenarios') }}" class="feature-card" style="text-decoration:none; display:block;">
+        <div class="icon">01</div>
+        <h3>Meus cenários</h3>
+        <p>Veja todas as suas simulações financeiras salvas.</p>
+    </a>
+
+    <a href="{{ url_for('novo_cenario') }}" class="feature-card" style="text-decoration:none; display:block;">
+        <div class="icon">02</div>
+        <h3>Novo cenário</h3>
+        <p>Simule uma nova renda e gastos do zero.</p>
+    </a>
+
+    <a href="{{ url_for('recomendacoes') }}" class="feature-card" style="text-decoration:none; display:block;">
+        <div class="icon">03</div>
+        <h3>Minhas recomendações</h3>
+        <p>Dicas de investimento mais aprofundadas para cada cenário.</p>
+    </a>
+
+    <a href="{{ url_for('conta') }}" class="feature-card" style="text-decoration:none; display:block;">
+        <div class="icon">04</div>
+        <h3>Minha conta</h3>
+        <p>Altere seu nome ou sua senha.</p>
+    </a>
+</div>
+
+{% endblock %}

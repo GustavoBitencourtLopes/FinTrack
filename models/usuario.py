@@ -101,6 +101,101 @@ class Cenario(Base):
                 "de médio/longo prazo, de acordo com seu perfil de risco."
             )
 
+    def recomendacoes_detalhadas(self):
+        """
+        Versão mais aprofundada da recomendação: devolve uma LISTA DE
+        DICIONÁRIOS, cada um com um 'titulo' e um 'texto'. Isso permite
+        mostrar várias dicas organizadas em cards na tela, em vez de um
+        parágrafo único. Continua sendo lógica simplificada e didática,
+        não é assessoria financeira real.
+        """
+        situacao = self.situacao_financeira()
+        sobra = self.sobra_mensal()
+        dicas = []
+
+        if situacao == "Alerta":
+            dicas.append({
+                "titulo": "Estanque o problema primeiro",
+                "texto": (
+                    "Seus gastos ultrapassam (ou quase) sua renda. Antes de qualquer "
+                    "investimento, liste os gastos que podem ser cortados ou "
+                    "renegociados nos próximos 30 dias."
+                ),
+            })
+            dicas.append({
+                "titulo": "Evite dívidas caras",
+                "texto": (
+                    "Cartão de crédito rotativo e cheque especial estão entre as formas "
+                    "mais caras de crédito no Brasil. Se já existe dívida assim, "
+                    "priorize quitá-la antes de pensar em investir."
+                ),
+            })
+            return dicas
+
+        if situacao == "Atenção":
+            dicas.append({
+                "titulo": "Reserva de emergência primeiro",
+                "texto": (
+                    f"Com R${sobra:.2f} de sobra, o objetivo inicial é juntar de 3 a 6 "
+                    "meses do seu custo de vida em algo com liquidez diária, como "
+                    "Tesouro Selic ou CDB 100% do CDI."
+                ),
+            })
+            dicas.append({
+                "titulo": "Revise suas categorias de gasto",
+                "texto": (
+                    "Olhe as transações por categoria e identifique onde é possível "
+                    "cortar 10-15% sem grande impacto no dia a dia."
+                ),
+            })
+            return dicas
+
+        # Situação "OK"
+        if sobra <= 0:
+            dicas.append({
+                "titulo": "Ajuste antes de investir",
+                "texto": "Sua renda está totalmente comprometida. Reveja os gastos antes de qualquer aporte.",
+            })
+        elif sobra < 500:
+            dicas.append({
+                "titulo": "Comece pequeno, mas comece",
+                "texto": (
+                    f"Com R${sobra:.2f}, já dá para abrir uma reserva de emergência em "
+                    "Tesouro Selic ou CDB de liquidez diária, mesmo com aportes pequenos "
+                    "e recorrentes."
+                ),
+            })
+        else:
+            dicas.append({
+                "titulo": "Reserva de emergência",
+                "texto": (
+                    "Mantenha de 3 a 6 meses do seu custo de vida em algo líquido e "
+                    "seguro (Tesouro Selic ou CDB de liquidez diária)."
+                ),
+            })
+            dicas.append({
+                "titulo": "Renda fixa de médio prazo",
+                "texto": (
+                    "Para objetivos de 1 a 3 anos, Tesouro IPCA+ ou CDBs de prazo mais "
+                    "longo tendem a render mais que a poupança."
+                ),
+            })
+            if sobra > 2000:
+                dicas.append({
+                    "titulo": "Diversifique com renda variável",
+                    "texto": (
+                        "Com uma sobra confortável, uma pequena parte (ex: 10-20%) pode "
+                        "ir para fundos ou ações, se o seu perfil tolerar oscilação. "
+                        "Quanto maior o prazo, mais espaço para esse tipo de risco."
+                    ),
+                })
+
+        dicas.append({
+            "titulo": "Revise periodicamente",
+            "texto": "Reavalie esse cenário a cada poucos meses — renda, gastos e objetivos mudam, e o plano deve acompanhar.",
+        })
+        return dicas
+
     def __repr__(self):
         return f"Cenario(nome={self.nome!r}, renda={self.renda_mensal})"
 

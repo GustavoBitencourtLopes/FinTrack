@@ -72,7 +72,7 @@ def login():
 
         if usuario and usuario.checar_senha(senha):
             login_user(usuario)
-            return redirect(url_for("cenarios"))
+            return redirect(url_for("painel"))
         else:
             flash("Email ou senha incorretos.")
             return redirect(url_for("login"))
@@ -85,6 +85,12 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for("home"))
+
+
+@app.route("/painel")
+@login_required
+def painel():
+    return render_template("painel.html")
 
 
 @app.route("/cenarios")
@@ -137,6 +143,49 @@ def adicionar_transacao(cenario_id):
     db_session.commit()
 
     return redirect(url_for("ver_cenario", cenario_id=cenario.id))
+
+
+@app.route("/recomendacoes")
+@login_required
+def recomendacoes():
+    """Lista os cenários para o usuário escolher qual ver as dicas detalhadas."""
+    return render_template("recomendacoes.html", cenarios=current_user.cenarios)
+
+
+@app.route("/recomendacoes/<int:cenario_id>")
+@login_required
+def ver_recomendacoes(cenario_id):
+    cenario = get_cenario_do_usuario_ou_404(cenario_id)
+    return render_template("recomendacoes_detalhe.html", cenario=cenario)
+
+
+@app.route("/conta", methods=["GET", "POST"])
+@login_required
+def conta():
+    if request.method == "POST":
+        acao = request.form.get("acao")
+
+        if acao == "atualizar_nome":
+            novo_nome = request.form["nome"].strip()
+            if novo_nome:
+                current_user.nome = novo_nome
+                db_session.commit()
+                flash("Nome atualizado com sucesso.")
+            return redirect(url_for("conta"))
+
+        if acao == "trocar_senha":
+            senha_atual = request.form["senha_atual"]
+            nova_senha = request.form["nova_senha"]
+
+            if not current_user.checar_senha(senha_atual):
+                flash("Senha atual incorreta.")
+            else:
+                current_user.set_senha(nova_senha)
+                db_session.commit()
+                flash("Senha alterada com sucesso.")
+            return redirect(url_for("conta"))
+
+    return render_template("conta.html")
 
 
 if __name__ == "__main__":

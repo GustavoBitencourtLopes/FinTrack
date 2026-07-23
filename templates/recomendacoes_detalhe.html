@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Recomendações — {{ cenario.nome }}{% endblock %}
+{% block content %}
+
+<div class="dash-header">
+    <div>
+        <div class="greeting"><a href="/recomendacoes">← Minhas recomendações</a></div>
+        <h1>{{ cenario.nome }}</h1>
+    </div>
+</div>
+
+<div class="grid">
+    {% for dica in cenario.recomendacoes_detalhadas() %}
+    <div class="card">
+        <h3>{{ dica.titulo }}</h3>
+        <p class="recommendation">{{ dica.texto }}</p>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="card" style="border-color: var(--warning); margin-top: 8px;">
+    <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">
+        ⚠️ Essas são apenas dicas gerais e simplificadas, geradas por regras automáticas.
+        Elas não substituem uma análise profissional. Consulte um especialista financeiro
+        antes de tomar decisões de investimento.
+    </p>
+</div>
+
+{% endblock %}
