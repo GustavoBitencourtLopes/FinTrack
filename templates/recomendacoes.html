@@ -13,8 +13,14 @@
 <p class="subtitle" style="color: var(--text-muted); margin-bottom: 20px;">Escolha um cenário para ver dicas de investimento mais aprofundadas.</p>
 <div class="grid">
     {% for c in cenarios %}
+    {% set situacao = c.situacao_financeira() %}
+    {% if situacao == "OK" %}{% set status_class = "status-ok" %}
+    {% elif situacao == "Atenção" %}{% set status_class = "status-atencao" %}
+    {% else %}{% set status_class = "status-alerta" %}{% endif %}
+
     <a href="{{ url_for('ver_recomendacoes', cenario_id=c.id) }}" class="card" style="text-decoration:none; display:block;">
-        <div class="stat-label">{{ c.nome }}</div>
+        <span class="status-badge {{ status_class }}">{{ situacao }}</span>
+        <div class="stat-label" style="margin-top: 4px;">{{ c.nome }}</div>
         <div class="stat-value">R$ {{ "%.2f"|format(c.renda_mensal) }}</div>
     </a>
     {% endfor %}

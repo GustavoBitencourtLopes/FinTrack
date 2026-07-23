@@ -9,34 +9,36 @@
     </div>
 </div>
 
-<div class="card" style="max-width: 440px; margin-bottom: 20px;">
-    <h3>Dados</h3>
-    <p style="color: var(--text-muted); font-size: 0.85rem;">Email: {{ current_user.email }} (não pode ser alterado)</p>
+<div class="narrow-center">
+    <div class="card" style="margin-bottom: 20px;">
+        <h3>Dados</h3>
+        <p class="hint" style="color: var(--text-muted); font-size: 0.85rem;">Email: {{ current_user.email }} (não pode ser alterado)</p>
 
-    <form method="POST">
-        <input type="hidden" name="acao" value="atualizar_nome">
-        <div class="field">
-            <label for="nome">Nome</label>
-            <input type="text" id="nome" name="nome" value="{{ current_user.nome }}" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Salvar nome</button>
-    </form>
-</div>
+        <form method="POST">
+            <input type="hidden" name="acao" value="atualizar_nome">
+            <div class="field">
+                <label for="nome">Nome</label>
+                <input type="text" id="nome" name="nome" value="{{ current_user.nome }}" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Salvar nome</button>
+        </form>
+    </div>
 
-<div class="card" style="max-width: 440px;">
-    <h3>Alterar senha</h3>
-    <form method="POST">
-        <input type="hidden" name="acao" value="trocar_senha">
-        <div class="field">
-            <label for="senha_atual">Senha atual</label>
-            <input type="password" id="senha_atual" name="senha_atual" required>
-        </div>
-        <div class="field">
-            <label for="nova_senha">Nova senha</label>
-            <input type="password" id="nova_senha" name="nova_senha" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Alterar senha</button>
-    </form>
+    <div class="card">
+        <h3>Alterar senha</h3>
+        <form method="POST">
+            <input type="hidden" name="acao" value="trocar_senha">
+            <div class="field">
+                <label for="senha_atual">Senha atual</label>
+                <input type="password" id="senha_atual" name="senha_atual" required>
+            </div>
+            <div class="field">
+                <label for="nova_senha">Nova senha</label>
+                <input type="password" id="nova_senha" name="nova_senha" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Alterar senha</button>
+        </form>
+    </div>
 </div>
 
 {% endblock %}

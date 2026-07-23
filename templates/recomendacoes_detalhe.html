@@ -2,13 +2,36 @@
 {% block title %}Recomendações — {{ cenario.nome }}{% endblock %}
 {% block content %}
 
+{% set situacao = cenario.situacao_financeira() %}
+{% if situacao == "OK" %}{% set status_class = "status-ok" %}
+{% elif situacao == "Atenção" %}{% set status_class = "status-atencao" %}
+{% else %}{% set status_class = "status-alerta" %}{% endif %}
+
 <div class="dash-header">
     <div>
         <div class="greeting"><a href="/recomendacoes">← Minhas recomendações</a></div>
         <h1>{{ cenario.nome }}</h1>
+        <span class="status-badge {{ status_class }}">{{ situacao }}</span>
     </div>
 </div>
 
+<div class="grid">
+    <div class="card chart-card">
+        <h3>Renda vs. Gastos vs. Sobra</h3>
+        <canvas id="graficoComparativo"></canvas>
+    </div>
+
+    <div class="card chart-card">
+        <h3>Gastos por categoria</h3>
+        {% if categorias_labels %}
+        <canvas id="graficoCategorias"></canvas>
+        {% else %}
+        <p class="empty-state">Nenhum gasto registrado ainda neste cenário.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="section-title">Dicas para este cenário</div>
 <div class="grid">
     {% for dica in cenario.recomendacoes_detalhadas() %}
     <div class="card">
@@ -26,4 +49,64 @@
     </p>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script>
+    // Pega as cores definidas no CSS, para os gráficos combinarem com o tema
+    const estilos = getComputedStyle(document.documentElement);
+    const corTexto = estilos.getPropertyValue('--text-muted').trim();
+    const corBorda = estilos.getPropertyValue('--border').trim();
+    const corAccent = estilos.getPropertyValue('--accent').trim();
+    const corViolet = estilos.getPropertyValue('--violet').trim();
+    const corWarning = estilos.getPropertyValue('--warning').trim();
+    const corDanger = estilos.getPropertyValue('--danger').trim();
+
+    Chart.defaults.color = corTexto;
+    Chart.defaults.font.family = "Inter, sans-serif";
+
+    // Gráfico 1: barras comparando renda, gastos e sobra
+    new Chart(document.getElementById('graficoComparativo'), {
+        type: 'bar',
+        data: {
+            labels: ['Renda', 'Gastos', 'Sobra'],
+            datasets: [{
+                data: [
+                    {{ cenario.renda_mensal }},
+                    {{ cenario.total_gastos() }},
+                    {{ cenario.sobra_mensal() }}
+                ],
+                backgroundColor: [corAccent, corDanger, corViolet],
+                borderRadius: 6,
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false } },
+                y: { grid: { color: corBorda }, beginAtZero: true }
+            }
+        }
+    });
+
+    {% if categorias_labels %}
+    // Gráfico 2: pizza (doughnut) de gastos por categoria
+    new Chart(document.getElementById('graficoCategorias'), {
+        type: 'doughnut',
+        data: {
+            labels: {{ categorias_labels | tojson }},
+            datasets: [{
+                data: {{ categorias_valores | tojson }},
+                backgroundColor: [corAccent, corViolet, corWarning, corDanger, '#4DA6FF', '#F472B6'],
+                borderColor: estilos.getPropertyValue('--surface').trim(),
+                borderWidth: 3,
+            }]
+        },
+        options: {
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+    {% endif %}
+</script>
 {% endblock %}

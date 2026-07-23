@@ -17,7 +17,11 @@
 
 body {
     margin: 0;
-    background: var(--bg);
+    background:
+        radial-gradient(ellipse 900px 500px at 15% -10%, rgba(0, 217, 163, 0.08), transparent),
+        radial-gradient(ellipse 700px 500px at 100% 10%, rgba(124, 108, 246, 0.06), transparent),
+        var(--bg);
+    background-attachment: fixed;
     color: var(--text);
     font-family: 'Inter', system-ui, sans-serif;
     line-height: 1.5;
@@ -49,7 +53,16 @@ a:focus-visible, button:focus-visible, input:focus-visible {
     margin-bottom: 48px;
 }
 
-.brand { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 1.2rem; letter-spacing: -0.02em; }
+.brand {
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    letter-spacing: -0.02em;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.brand-mark { flex-shrink: 0; }
 .brand span { color: var(--accent); }
 
 .nav-links a { color: var(--text-muted); margin-left: 24px; font-size: 0.95rem; }
@@ -200,6 +213,16 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .empty-state { color: var(--text-muted); font-size: 0.9rem; padding: 20px 0; text-align: center; }
 
 .form-card { margin-top: 24px; }
+
+.narrow-center {
+    max-width: 440px;
+    margin: 0 auto 20px;
+}
+.narrow-center h1, .narrow-center h3 { text-align: center; }
+.narrow-center .subtitle, .narrow-center p.hint { text-align: center; }
+
+.chart-card canvas { max-height: 260px; }
+.chart-card h3 { margin-bottom: 16px; }
 
 @media (max-width: 640px) {
     .features { grid-template-columns: 1fr; }

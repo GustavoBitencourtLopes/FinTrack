@@ -39,6 +39,11 @@ def home():
     return render_template("home.html")
 
 
+@app.route("/sobre")
+def sobre():
+    return render_template("sobre.html")
+
+
 @app.route("/cadastro", methods=["GET", "POST"])
 def cadastro():
     if request.method == "POST":
@@ -156,7 +161,19 @@ def recomendacoes():
 @login_required
 def ver_recomendacoes(cenario_id):
     cenario = get_cenario_do_usuario_ou_404(cenario_id)
-    return render_template("recomendacoes_detalhe.html", cenario=cenario)
+
+    # Agrupa os gastos por categoria (soma o valor de cada categoria),
+    # para alimentar o gráfico de pizza na tela.
+    por_categoria = {}
+    for t in cenario.transacoes:
+        por_categoria[t.categoria] = por_categoria.get(t.categoria, 0) + t.valor
+
+    return render_template(
+        "recomendacoes_detalhe.html",
+        cenario=cenario,
+        categorias_labels=list(por_categoria.keys()),
+        categorias_valores=list(por_categoria.values()),
+    )
 
 
 @app.route("/conta", methods=["GET", "POST"])

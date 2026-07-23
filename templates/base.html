@@ -11,13 +11,22 @@
 <body>
     <div class="page">
         <nav class="nav">
-            <a href="/" class="brand">Fin<span>Track</span></a>
+            <a href="/" class="brand">
+                <svg class="brand-mark" width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="13" cy="13" r="12" stroke="var(--accent)" stroke-width="1.5" opacity="0.35"/>
+                    <path d="M6 15.5L10.5 10.5L14 14L20 7" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M16.5 7H20V10.5" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Fin<span>Track</span>
+            </a>
             <div class="nav-links">
                 {% if current_user.is_authenticated %}
                     <a href="/painel">Painel</a>
                     <a href="/cenarios">Meus Cenários</a>
+                    <a href="/sobre">Conheça quem sou</a>
                     <a href="/logout">Sair</a>
                 {% else %}
+                    <a href="/sobre">Conheça quem sou</a>
                     <a href="/login">Entrar</a>
                     <a href="/cadastro">Criar conta</a>
                 {% endif %}
@@ -36,5 +45,6 @@
 
         {% block content %}{% endblock %}
     </div>
+    {% block scripts %}{% endblock %}
 </body>
 </html>
