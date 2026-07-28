@@ -52,63 +52,72 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script>
-    // Pega as cores definidas no CSS, para os gráficos combinarem com o tema
-    const estilos = getComputedStyle(document.documentElement);
-    const corTexto = estilos.getPropertyValue('--text-muted').trim();
-    const corBorda = estilos.getPropertyValue('--border').trim();
-    const corAccent = estilos.getPropertyValue('--accent').trim();
-    const corViolet = estilos.getPropertyValue('--violet').trim();
-    const corWarning = estilos.getPropertyValue('--warning').trim();
-    const corDanger = estilos.getPropertyValue('--danger').trim();
+    if (typeof Chart === 'undefined') {
+        // Se isso aparecer, o script do Chart.js não conseguiu carregar
+        // (rede bloqueando o CDN, sem internet, etc). Mostramos um aviso
+        // visível em vez de deixar os cards vazios sem explicação.
+        document.querySelectorAll('.chart-wrapper').forEach((el) => {
+            el.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem;">Não foi possível carregar a biblioteca de gráficos (Chart.js). Verifique sua conexão com a internet.</p>';
+        });
+    } else {
+        // Pega as cores definidas no CSS, para os gráficos combinarem com o tema
+        const estilos = getComputedStyle(document.documentElement);
+        const corTexto = estilos.getPropertyValue('--text-muted').trim();
+        const corBorda = estilos.getPropertyValue('--border').trim();
+        const corAccent = estilos.getPropertyValue('--accent').trim();
+        const corViolet = estilos.getPropertyValue('--violet').trim();
+        const corWarning = estilos.getPropertyValue('--warning').trim();
+        const corDanger = estilos.getPropertyValue('--danger').trim();
 
-    Chart.defaults.color = corTexto;
-    Chart.defaults.font.family = "Inter, sans-serif";
+        Chart.defaults.color = corTexto;
+        Chart.defaults.font.family = "Inter, sans-serif";
 
-    // Gráfico 1: barras comparando renda, gastos e sobra
-    new Chart(document.getElementById('graficoComparativo'), {
-        type: 'bar',
-        data: {
-            labels: ['Renda', 'Gastos', 'Sobra'],
-            datasets: [{
-                data: [
-                    {{ cenario.renda_mensal }},
-                    {{ cenario.total_gastos() }},
-                    {{ cenario.sobra_mensal() }}
-                ],
-                backgroundColor: [corAccent, corDanger, corViolet],
-                borderRadius: 6,
-            }]
-        },
-        options: {
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: { grid: { display: false } },
-                y: { grid: { color: corBorda }, beginAtZero: true }
+        // Gráfico 1: barras comparando renda, gastos e sobra
+        new Chart(document.getElementById('graficoComparativo'), {
+            type: 'bar',
+            data: {
+                labels: ['Renda', 'Gastos', 'Sobra'],
+                datasets: [{
+                    data: [
+                        {{ cenario.renda_mensal }},
+                        {{ cenario.total_gastos() }},
+                        {{ cenario.sobra_mensal() }}
+                    ],
+                    backgroundColor: [corAccent, corDanger, corViolet],
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { grid: { color: corBorda }, beginAtZero: true }
+                }
             }
-        }
-    });
+        });
 
-    {% if categorias_labels %}
-    // Gráfico 2: pizza (doughnut) de gastos por categoria
-    new Chart(document.getElementById('graficoCategorias'), {
-        type: 'doughnut',
-        data: {
-            labels: {{ categorias_labels | tojson }},
-            datasets: [{
-                data: {{ categorias_valores | tojson }},
-                backgroundColor: [corAccent, corViolet, corWarning, corDanger, '#4DA6FF', '#F472B6'],
-                borderColor: estilos.getPropertyValue('--surface').trim(),
-                borderWidth: 3,
-            }]
-        },
-        options: {
-            maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom' } }
-        }
-    });
-    {% endif %}
+        {% if categorias_labels %}
+        // Gráfico 2: pizza (doughnut) de gastos por categoria
+        new Chart(document.getElementById('graficoCategorias'), {
+            type: 'doughnut',
+            data: {
+                labels: {{ categorias_labels | tojson }},
+                datasets: [{
+                    data: {{ categorias_valores | tojson }},
+                    backgroundColor: [corAccent, corViolet, corWarning, corDanger, '#4DA6FF', '#F472B6'],
+                    borderColor: estilos.getPropertyValue('--surface').trim(),
+                    borderWidth: 3,
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+        {% endif %}
+    }
 </script>
 {% endblock %}
