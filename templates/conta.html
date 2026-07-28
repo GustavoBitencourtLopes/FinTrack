@@ -2,14 +2,12 @@
 {% block title %}Minha Conta — FinTrack{% endblock %}
 {% block content %}
 
-<div class="dash-header">
-    <div>
+<div class="narrow-center" style="margin-top: 20px;">
+    <div style="text-align:center; margin-bottom: 28px;">
         <div class="greeting"><a href="/painel">← Painel</a></div>
         <h1>Minha conta</h1>
     </div>
-</div>
 
-<div class="narrow-center">
     <div class="card" style="margin-bottom: 20px;">
         <h3>Dados</h3>
         <p class="hint" style="color: var(--text-muted); font-size: 0.85rem;">Email: {{ current_user.email }} (não pode ser alterado)</p>
