@@ -68,6 +68,26 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .nav-links a { color: var(--text-muted); margin-left: 24px; font-size: 0.95rem; }
 .nav-links a:hover { color: var(--text); }
 
+.nav-icon {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    margin-left: 14px !important;
+    color: var(--text-muted) !important;
+    transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    vertical-align: middle;
+}
+.nav-icon:hover {
+    color: var(--accent) !important;
+    border-color: var(--accent-dim);
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+
 .hero { padding: 40px 0 72px; }
 
 .eyebrow {
@@ -226,6 +246,7 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 
 @media (max-width: 640px) {
     .features { grid-template-columns: 1fr; }
+    .features .feature-card:nth-child(4) { grid-column: 1; }
     .grid { grid-template-columns: 1fr; }
     .gauge-card { grid-column: span 1; flex-direction: column; text-align: center; }
     .nav-links a { margin-left: 14px; }
@@ -252,6 +273,7 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .features .feature-card:nth-child(1) { animation: fade-up 0.5s ease 0.05s both; }
 .features .feature-card:nth-child(2) { animation: fade-up 0.5s ease 0.15s both; }
 .features .feature-card:nth-child(3) { animation: fade-up 0.5s ease 0.25s both; }
+.features .feature-card:nth-child(4) { grid-column: 2; animation: fade-up 0.5s ease 0.3s both; }
 
 .grid > .card:nth-child(1) { animation-delay: 0.05s; }
 .grid > .card:nth-child(2) { animation-delay: 0.1s; }
