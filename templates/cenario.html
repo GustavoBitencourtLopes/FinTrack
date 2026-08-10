@@ -5,14 +5,14 @@
 {% set pct = [cenario.percentual_gasto(), 100] | min %}
 {% set situacao = cenario.situacao_financeira() %}
 {% if situacao == "OK" %}
-    {% set status_class = "status-ok" %}
-    {% set gauge_color = "var(--accent)" %}
+{% set status_class = "status-ok" %}
+{% set gauge_color = "var(--accent)" %}
 {% elif situacao == "Atenção" %}
-    {% set status_class = "status-atencao" %}
-    {% set gauge_color = "var(--warning)" %}
+{% set status_class = "status-atencao" %}
+{% set gauge_color = "var(--warning)" %}
 {% else %}
-    {% set status_class = "status-alerta" %}
-    {% set gauge_color = "var(--danger)" %}
+{% set status_class = "status-alerta" %}
+{% set gauge_color = "var(--danger)" %}
 {% endif %}
 
 <div class="dash-header">
@@ -20,6 +20,7 @@
         <div class="greeting"><a href="/cenarios">← Meus cenários</a></div>
         <h1>{{ cenario.nome }}</h1>
     </div>
+    <a href="{{ url_for('ver_recomendacoes', cenario_id=cenario.id) }}" class="btn btn-primary">Ver recomendações</a>
 </div>
 
 <div class="grid">

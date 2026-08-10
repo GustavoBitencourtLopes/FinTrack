@@ -4,10 +4,15 @@
 <section class="hero">
     <div class="eyebrow">Controle financeiro pessoal</div>
     <h1>Saiba exatamente para onde vai o seu dinheiro.</h1>
-    <p>O FinTrack cruza sua renda com seus gastos, mostra sua real situação financeira e recomenda o próximo passo — sem planilha, sem complicação.</p>
+    <p>O FinTrack cruza sua renda com seus gastos, mostra sua real situação financeira e recomenda o próximo passo — sem
+        planilha, sem complicação.</p>
     <div class="cta-row">
+        {% if current_user.is_authenticated %}
+        <a href="/painel" class="btn btn-primary">Ir para o Painel</a>
+        {% else %}
         <a href="/cadastro" class="btn btn-primary">Criar minha conta</a>
         <a href="/login" class="btn btn-ghost">Já tenho conta</a>
+        {% endif %}
     </div>
 
     <div class="features">
